@@ -1,0 +1,13 @@
+// File: frontend/src/hooks/useAuth.js
+
+import {
+    useContext
+} from 'react';
+import AuthContext from '../context/AuthContext';
+
+// This is our simple shortcut hook!
+const useAuth = () => {
+    return useContext(AuthContext);
+};
+
+export default useAuth;
