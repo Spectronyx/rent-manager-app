@@ -29,7 +29,7 @@ const app = express();
 
 // 5. Add core middleware
 // MUST come *before* rate limiters and routes
-const allowedOrigins = ["https://rent-manager-app.vercel.app", "https://rent-manager-app-git-main-rajneesh-sharmas-projects.vercel.app?_vercel_share=KYpsMRRDH6W3ZE4elvrCX3Z1jGr6s308"]
+const allowedOrigins = ["https://rent-manager-app.vercel.app", "https://rent-manager-app-git-main-rajneesh-sharmas-projects.vercel.app?_vercel_share=KYpsMRRDH6W3ZE4elvrCX3Z1jGr6s308", "https://rent-manager-app-git-main-rajneesh-sharmas-projects.vercel.app"]
 app.use(cors({
     origin: allowedOrigins
 }));
