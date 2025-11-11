@@ -22,7 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-/uploads
 
 # Ignore node_modules folders in all subdirectories
 **/node_modules
