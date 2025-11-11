@@ -55,7 +55,6 @@ const BuildingList = ({ buildings, isLoading, error }) => {
     );
 };
 
-// 7. We can now delete the old 'buildingItemStyle' object
-// const buildingItemStyle = { ... };
+
 
 export default BuildingList;

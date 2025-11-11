@@ -1,26 +1,22 @@
 // File: frontend/src/pages/DashboardPage.jsx
 
-import React, { useState, useEffect, useCallback } from 'react'; /import useAuth from '../hooks/useAuth';
+import React, { useState, useEffect, useCallback } from 'react';
+import useAuth from '../hooks/useAuth'; // <-- FIX #1: Correctly imported useAuth
 import CreateBuildingForm from '../components/admin/CreateBuildingForm';
 import BuildingList from '../components/admin/BuildingList';
 import StudentBillView from '../components/student/StudentBillView';
 import PendingBillsList from '../components/admin/PendingBillsList';
 import DocumentList from '../components/DocumentList';
 import CreateAdminForm from '../components/admin/CreateAdminForm';
-import { getMyBuildings } from '../api/buildingApi'; // 2. Import the API call
-
-// 1. Import our new Shadcn Separator
+import { getMyBuildings } from '../api/buildingApi';
 import { Separator } from '@/components/ui/separator';
 
 const DashboardPage = () => {
     const { user } = useAuth();
-
-    // 3. Lift the state up to the parent
     const [buildings, setBuildings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    // 4. Create the fetch/refresh function
     const fetchBuildings = useCallback(async () => {
         setLoading(true);
         try {
@@ -33,26 +29,25 @@ const DashboardPage = () => {
         }
     }, []);
 
-    // 5. Fetch buildings when the admin dashboard loads
+    // --- FIX #2: Added a 'guard clause' to prevent crash ---
     useEffect(() => {
-        if (user.role === 'admin') {
+        // We must check if 'user' exists *before* reading 'user.role'
+        if (user && user.role === 'admin') {
             fetchBuildings();
         }
-    }, [user.role, fetchBuildings]);
+    }, [user, fetchBuildings]); // <-- Dependency should be 'user'
 
+    // --- FIX #3: This is the only 'loading' check we need ---
     if (!user) {
+        // This is correct. It waits for useAuth to load the user.
         return <p>Loading...</p>;
     }
 
-    // 6. This is the "refresh" function we'll pass to the form
     const handleBuildingCreated = () => {
-        fetchBuildings(); // Just re-run the fetch
+        fetchBuildings();
     };
 
-    if (!user) {
-        return <p>Loading...</p>;
-    }
-
+    // --- FIX #4: Removed the duplicate 'if (!user)' check that was here ---
 
     // 2. This is the new, styled JSX
     return (
