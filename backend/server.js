@@ -30,7 +30,7 @@ const app = express();
 // 5. Add core middleware
 // MUST come *before* rate limiters and routes
 app.use(cors({
-    origin: "https://rent-manager-app-git-main-rajneesh-sharmas-projects.vercel.app"
+    origin: "https://rent-manager-app.vercel.app"
 }));
 app.use(express.json()); // To accept JSON data
 
