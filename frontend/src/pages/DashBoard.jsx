@@ -1,7 +1,6 @@
 // File: frontend/src/pages/DashboardPage.jsx
 
-import React, { useEffect, useCallback } from 'react'; // 1. Import hooks
-import useAuth from '../hooks/useAuth';
+import React, { useState, useEffect, useCallback } from 'react'; /import useAuth from '../hooks/useAuth';
 import CreateBuildingForm from '../components/admin/CreateBuildingForm';
 import BuildingList from '../components/admin/BuildingList';
 import StudentBillView from '../components/student/StudentBillView';
@@ -16,10 +15,12 @@ import { Separator } from '@/components/ui/separator';
 const DashboardPage = () => {
     const { user } = useAuth();
 
-    if (!user) {
-        return <p>Loading...</p>;
-    }
+    // 3. Lift the state up to the parent
+    const [buildings, setBuildings] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
+    // 4. Create the fetch/refresh function
     const fetchBuildings = useCallback(async () => {
         setLoading(true);
         try {
@@ -47,6 +48,11 @@ const DashboardPage = () => {
     const handleBuildingCreated = () => {
         fetchBuildings(); // Just re-run the fetch
     };
+
+    if (!user) {
+        return <p>Loading...</p>;
+    }
+
 
     // 2. This is the new, styled JSX
     return (
@@ -76,6 +82,7 @@ const DashboardPage = () => {
 
                     <div>
                         <h2 className="text-2xl font-semibold mb-4">Manage Buildings</h2>
+                        {/* 7. Pass the "refresh" function to the form */}
                         <CreateBuildingForm onBuildingCreated={handleBuildingCreated} />
 
                         {/* 8. Pass the buildings list (and state) to the list component */}

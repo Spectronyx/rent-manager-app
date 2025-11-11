@@ -37,6 +37,11 @@ const CreateBuildingForm = ({ onBuildingCreated }) => {
             setMessage(`Building created: ${newBuilding.name}`);
             setName('');
             setAddress('');
+
+            // 2. THIS IS THE FIX: Call the parent's function!
+            if (onBuildingCreated) {
+                onBuildingCreated();
+            }
         } catch (err) {
             setError(err.message);
         }
