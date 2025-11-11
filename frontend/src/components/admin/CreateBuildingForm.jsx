@@ -16,7 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-const CreateBuildingForm = () => {
+const CreateBuildingForm = ({ onBuildingCreated }) => {
     // All this logic is 100% unchanged
     const [name, setName] = useState('');
     const [address, setAddress] = useState('');
@@ -27,6 +27,10 @@ const CreateBuildingForm = () => {
         e.preventDefault();
         setMessage('');
         setError('');
+
+        if (onBuildingCreated) {
+            onBuildingCreated();
+        }
 
         try {
             const newBuilding = await createBuilding({ name, address });

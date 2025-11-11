@@ -1,7 +1,6 @@
 // File: frontend/src/components/admin/BuildingList.jsx
 
-import React, { useState, useEffect } from 'react';
-import { getMyBuildings } from '../../api/buildingApi';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 // 1. Import the Shadcn Card components
@@ -12,28 +11,9 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 
-const BuildingList = () => {
-    // All this logic is 100% unchanged
-    const [buildings, setBuildings] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState('');
+const BuildingList = ({ buildings, isLoading, error }) => {
 
-    useEffect(() => {
-        const fetchBuildings = async () => {
-            try {
-                const data = await getMyBuildings();
-                setBuildings(data);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setIsLoading(false);
-            }
-        };
 
-        fetchBuildings();
-    }, []);
-
-    // 2. Add styled loading/error messages
     if (isLoading) {
         return <p className="text-muted-foreground">Loading buildings...</p>;
     }
