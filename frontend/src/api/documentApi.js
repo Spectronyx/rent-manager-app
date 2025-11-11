@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 
-const API_URL = 'http://localhost:4000/api/documents'; // Using 5001 as we planned
+const API_URL = `${import.meta.env.VITE_API_URL}/api/documents`; // Using 5001 as we planned
 
 export const uploadDocument = async (userId, documentType, file) => {
     const formData = new FormData();

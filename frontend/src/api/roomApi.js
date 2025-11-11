@@ -3,7 +3,7 @@
 import axios from 'axios';
 
 // Note the URL path!
-const API_URL = 'http://localhost:4000/api/rooms';
+const API_URL = `${import.meta.env.VITE_API_URL}/api/rooms`;
 
 // POST /api/rooms
 export const createRoom = async (roomData) => {
@@ -28,7 +28,7 @@ export const getRoomsInBuilding = async (buildingId) => {
 export const assignTenantToRoom = async (roomId, tenantId) => {
     try {
         const res = await axios.put(
-            `http://localhost:4000/api/rooms/${roomId}/assign`, {
+            `${import.meta.env.VITE_API_URL}/api/rooms/${roomId}/assign`, {
                 tenantId
             } // The { tenantId } is the request 'body'
         );
@@ -42,7 +42,7 @@ export const vacateRoom = async (roomId) => {
     try {
         // This endpoint doesn't need a 'body', just the URL
         const res = await axios.put(
-            `http://localhost:4000/api/rooms/${roomId}/vacate`
+            `${import.meta.env.VITE_API_URL}/${roomId}/vacate`
         );
         return res.data;
     } catch (error) {

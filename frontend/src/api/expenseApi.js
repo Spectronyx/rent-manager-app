@@ -3,7 +3,7 @@
 import axios from 'axios';
 
 // Use your correct port
-const API_URL = 'http://localhost:4000/api/expenses';
+const API_URL = `${import.meta.env.VITE_API_URL}/api/expenses`;
 
 // POST /api/expenses
 export const createExpense = async (expenseData) => {

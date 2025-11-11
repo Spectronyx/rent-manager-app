@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 
-const API_URL = 'http://localhost:4000/api/bills';
+const API_URL = `${import.meta.env.VITE_API_URL}/api/bills`;
 
 // GET /api/bills/mybill
 export const getMyCurrentBill = async () => {

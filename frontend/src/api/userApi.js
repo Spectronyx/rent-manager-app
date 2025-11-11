@@ -3,7 +3,7 @@
 import axios from 'axios';
 
 // Note: The URL is /api/users
-const API_URL = 'http://localhost:4000/api/users';
+const API_URL = `${import.meta.env.VITE_API_URL}/api/users`;
 
 // GET /api/users (gets all students)
 export const getAllStudents = async () => {

@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
         try {
             // 1. Call our backend API's login endpoint
-            const res = await axios.post('http://localhost:4000/api/users/login', {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/login`, {
                 email,
                 password,
             });
@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }) => {
     const register = async (name, email, password, phone) => {
         try {
             // 1. Call our backend's register endpoint
-            const res = await axios.post('http://localhost:4000/api/users', {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/users`, {
                 name,
                 email,
                 password,

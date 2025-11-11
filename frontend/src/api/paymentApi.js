@@ -3,7 +3,7 @@
 import axios from 'axios';
 
 // Use your correct port
-const API_URL = 'http://localhost:4000/api/payments';
+const API_URL = `${import.meta.env.VITE_API_URL}/api/payments`;
 
 // POST /api/payments/confirm/:billId
 export const confirmPayment = async (billId, amount, paymentMethod) => {
