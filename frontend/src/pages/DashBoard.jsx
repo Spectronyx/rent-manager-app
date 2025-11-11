@@ -1,7 +1,6 @@
 // File: frontend/src/pages/DashboardPage.jsx
 
-import React, { useState, useEffect, useCallback } from 'react'; // 1. Import hooks
-import React from 'react';
+import React, { useEffect, useCallback } from 'react'; // 1. Import hooks
 import useAuth from '../hooks/useAuth';
 import CreateBuildingForm from '../components/admin/CreateBuildingForm';
 import BuildingList from '../components/admin/BuildingList';
