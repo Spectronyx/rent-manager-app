@@ -3,6 +3,11 @@
 import React, { useState } from 'react';
 import { updateBillCharges } from '../../api/billApi';
 
+// 1. Import our Shadcn components
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
 // This component receives a single 'bill' object as a prop
 const UpdateBillForm = ({ bill }) => {
     const [electricity, setElectricity] = useState(bill.electricityBill || 0);
@@ -18,49 +23,75 @@ const UpdateBillForm = ({ bill }) => {
                 otherCharges: Number(other),
             });
             setMessage('Saved!');
-        } catch (error) {
+            // Hide "Saved!" message after 2 seconds
+            setTimeout(() => setMessage(''), 2000);
+        } catch (error) { // <-- 2. THIS IS THE FIX
             setMessage('Failed to save.');
-        }
+        } // <-- 2. THIS IS THE FIX
     };
 
+    // 3. This is the new, styled JSX
     return (
-        <form onSubmit={handleSave} style={formStyle}>
-            <span>
-                <strong>{bill.roomId.roomNumber}</strong> ({bill.tenantId.name})
-            </span>
-            <span>Rent: ₹{bill.rent}</span>
-            <label>
-                Electricity: ₹
-                <input
-                    type="number"
-                    value={electricity}
-                    onChange={(e) => setElectricity(e.target.value)}
-                    style={{ width: '80px' }}
-                />
-            </label>
-            <label>
-                Other: ₹
-                <input
-                    type="number"
-                    value={other}
-                    onChange={(e) => setOther(e.target.value)}
-                    style={{ width: '80px' }}
-                />
-            </label>
-            <button type="submit">Save</button>
-            {message && <small style={{ marginLeft: '10px' }}>{message}</small>}
+        // Replaced the style object with Tailwind classes
+        <form
+            onSubmit={handleSave}
+            className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-lg mb-4"
+        >
+            {/* Tenant & Room Info */}
+            <div className="flex flex-col">
+                <span className="font-bold">{bill.roomId.roomNumber}</span>
+                <span className="text-sm text-muted-foreground">
+                    {bill.tenantId.name}
+                </span>
+            </div>
+
+            {/* Base Rent */}
+            <div className="flex flex-col">
+                <Label className="text-sm text-muted-foreground">Rent</Label>
+                <span className="font-medium">₹{bill.rent}</span>
+            </div>
+
+            {/* Electricity Input */}
+            <div className="space-y-2">
+                <Label htmlFor={`electricity-${bill._id}`}>Electricity</Label>
+                <div className="flex items-center gap-1">
+                    <span>₹</span>
+                    <Input
+                        id={`electricity-${bill._id}`}
+                        type="number"
+                        value={electricity}
+                        onChange={(e) => setElectricity(e.target.value)}
+                        className="w-24" // Gave it a fixed width
+                    />
+                </div>
+            </div>
+
+            {/* Other Charges Input */}
+            <div className="space-y-2">
+                <Label htmlFor={`other-${bill._id}`}>Other</Label>
+                <div className="flex items-center gap-1">
+                    <span>₹</span>
+                    <Input
+                        id={`other-${bill._id}`}
+                        type="number"
+                        value={other}
+                        onChange={(e) => setOther(e.target.value)}
+                        className="w-24" // Gave it a fixed width
+                    />
+                </div>
+            </div>
+
+            {/* Save Button & Message */}
+            <div className="flex items-center gap-2">
+                <Button type="submit" size="sm">Save</Button>
+                {message && (
+                    <small className="text-sm font-medium text-green-600">
+                        {message}
+                    </small>
+                )}
+            </div>
         </form>
     );
-};
-
-const formStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '1rem',
-    border: '1px solid #eee',
-    marginBottom: '10px',
-    borderRadius: '5px',
 };
 
 export default UpdateBillForm;
