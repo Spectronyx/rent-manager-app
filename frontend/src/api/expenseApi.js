@@ -52,3 +52,40 @@ export const getExpenseStats = async (buildingId) => {
         throw new Error(message);
     }
 };
+
+// GET /api/expenses/month/:year/:month
+export const getExpensesForMonth = async (year, month, buildingId) => {
+    try {
+        const params = buildingId ? `?buildingId=${buildingId}` : '';
+        const res = await axios.get(`${API_URL}/month/${year}/${month}${params}`);
+        return res.data;
+    } catch (error) {
+        const message =
+            (error.response &&
+                error.response.data &&
+                error.response.data.message) ||
+            error.message ||
+            'Could not fetch expenses for month';
+        throw new Error(message);
+    }
+};
+
+// GET /api/expenses/profit-analysis
+export const getMonthlyProfitAnalysis = async (months = 6, buildingId) => {
+    try {
+        const params = new URLSearchParams();
+        params.append('months', months);
+        if (buildingId) params.append('buildingId', buildingId);
+
+        const res = await axios.get(`${API_URL}/profit-analysis?${params.toString()}`);
+        return res.data;
+    } catch (error) {
+        const message =
+            (error.response &&
+                error.response.data &&
+                error.response.data.message) ||
+            error.message ||
+            'Could not fetch profit analysis';
+        throw new Error(message);
+    }
+};

@@ -67,7 +67,7 @@ const getRoomsInBuilding = asyncHandler(async (req, res) => {
             buildingId
         }).populate(
             'tenantId',
-            'name email'
+            'name email phone aadharNo collegeId'
         );
 
         res.json(rooms);

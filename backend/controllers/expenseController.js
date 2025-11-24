@@ -14,11 +14,14 @@ const createExpense = asyncHandler(async (req, res) => {
         category,
         amount,
         description,
-        date
+        month,
+        year,
+        expenseDate,
+        notes
     } = req.body;
     const adminId = req.user._id;
 
-    if (!buildingId || !category || !amount || !description) {
+    if (!buildingId || !category || !amount || !description || !month || !year) {
         res.status(400);
         throw new Error('Please fill out all required fields');
     }
@@ -36,7 +39,10 @@ const createExpense = asyncHandler(async (req, res) => {
         category,
         amount: Number(amount),
         description,
-        date: date || Date.now(),
+        month: parseInt(month),
+        year: parseInt(year),
+        expenseDate: expenseDate || Date.now(),
+        notes: notes || '',
     });
 
     res.status(201).json(expense);
@@ -61,10 +67,44 @@ const getExpensesForBuilding = asyncHandler(async (req, res) => {
     const expenses = await Expense.find({
         buildingId
     }).sort({
-        date: -1
+        year: -1,
+        month: -1,
+        expenseDate: -1
     });
     res.json(expenses);
 });
+
+// @desc    Get expenses for a specific month
+// @route   GET /api/expenses/month/:year/:month
+// @access  Private/Admin
+const getExpensesForMonth = asyncHandler(async (req, res) => {
+    const { year, month } = req.params;
+    const { buildingId } = req.query;
+    const adminId = req.user._id;
+
+    const filter = {
+        adminId,
+        year: parseInt(year),
+        month: parseInt(month)
+    };
+
+    if (buildingId) {
+        // Security check if building ID provided
+        const building = await Building.findById(buildingId);
+        if (!building || building.adminId.toString() !== adminId.toString()) {
+            res.status(401);
+            throw new Error('Not authorized');
+        }
+        filter.buildingId = buildingId;
+    }
+
+    const expenses = await Expense.find(filter)
+        .populate('buildingId', 'name')
+        .sort({ expenseDate: -1 });
+
+    res.json(expenses);
+});
+
 // @desc    Get expense statistics for a building
 // @route   GET /api/expenses/stats/:buildingId
 // @access  Private/Admin
@@ -83,24 +123,24 @@ const getExpenseStats = asyncHandler(async (req, res) => {
 
     // 2. Use an Aggregation Pipeline to calculate the sum
     const stats = await Expense.aggregate([{
-            // Stage 1: Filter to get only expenses for this building
-            // We must convert the string ID to a MongoDB ObjectId
-            $match: {
-                buildingId: new mongoose.Types.ObjectId(buildingId)
-            },
+        // Stage 1: Filter to get only expenses for this building
+        // We must convert the string ID to a MongoDB ObjectId
+        $match: {
+            buildingId: new mongoose.Types.ObjectId(buildingId)
         },
-        {
-            // Stage 2: Group them together and calculate the sum
-            $group: {
-                _id: '$buildingId', // Group by buildingId
-                totalExpenses: {
-                    $sum: '$amount'
-                }, // Sum the 'amount' field
-                count: {
-                    $sum: 1
-                }, // Count the number of expense entries
-            },
+    },
+    {
+        // Stage 2: Group them together and calculate the sum
+        $group: {
+            _id: '$buildingId', // Group by buildingId
+            totalExpenses: {
+                $sum: '$amount'
+            }, // Sum the 'amount' field
+            count: {
+                $sum: 1
+            }, // Count the number of expense entries
         },
+    },
     ]);
 
     if (stats.length > 0) {
@@ -115,8 +155,84 @@ const getExpenseStats = asyncHandler(async (req, res) => {
     }
 });
 
+// @desc    Get monthly profit analysis
+// @route   GET /api/expenses/profit-analysis
+// @access  Private/Admin
+const getMonthlyProfitAnalysis = asyncHandler(async (req, res) => {
+    const adminId = req.user._id;
+    const { months = 6, buildingId } = req.query;
+
+    // Get buildings owned by admin
+    const buildingFilter = { adminId };
+    if (buildingId) buildingFilter._id = buildingId;
+
+    const buildings = await Building.find(buildingFilter);
+    const buildingIds = buildings.map(b => b._id);
+
+    // Get expense data for last N months
+    const currentDate = new Date();
+    const monthsData = [];
+
+    for (let i = parseInt(months) - 1; i >= 0; i--) {
+        const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+        const month = date.getMonth() + 1;
+        const year = date.getFullYear();
+
+        // Get expenses for this month
+        const expenses = await Expense.aggregate([
+            {
+                $match: {
+                    buildingId: { $in: buildingIds },
+                    month,
+                    year
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalExpenses: { $sum: '$amount' },
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        monthsData.push({
+            month,
+            year,
+            monthName: new Date(year, month - 1).toLocaleString('default', { month: 'long' }),
+            expenses: expenses[0] || { totalExpenses: 0, count: 0 }
+        });
+    }
+
+    res.json(monthsData);
+});
+
+// @desc    Delete expense
+// @route   DELETE /api/expenses/:id
+// @access  Private/Admin
+const deleteExpense = asyncHandler(async (req, res) => {
+    const expense = await Expense.findById(req.params.id);
+
+    if (!expense) {
+        res.status(404);
+        throw new Error('Expense not found');
+    }
+
+    // Security check
+    if (expense.adminId.toString() !== req.user._id.toString()) {
+        res.status(401);
+        throw new Error('Not authorized');
+    }
+
+    await expense.deleteOne();
+    res.json({ message: 'Expense deleted', id: req.params.id });
+});
+
 module.exports = {
     createExpense,
     getExpensesForBuilding,
+    getExpensesForMonth,
     getExpenseStats,
+    getMonthlyProfitAnalysis,
+    deleteExpense,
 };

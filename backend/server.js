@@ -13,6 +13,9 @@ const billRoutes = require("./routes/billRoutes.js");
 const paymentRoutes = require("./routes/paymentRoutes.js");
 const documentRoutes = require("./routes/documentRoutes.js");
 const expenseRoutes = require("./routes/expenseRoute.js"); // <-- 2. Fixed typo (plural)
+const tenantRoutes = require("./routes/tenantRoutes.js"); // NEW
+const financialRoutes = require("./routes/financialRoutes.js"); // NEW
+const rentRecordRoutes = require("./routes/rentRecordRoutes.js"); // NEW
 const { notFound, errorHandler } = require("./middlewares/errorMiddleware.js");
 
 // 2. Load our environment variables from .env
@@ -32,6 +35,7 @@ const allowedOrigins = [
     "https://rent-manager-app-git-main-rajneesh-sharmas-projects.vercel.app",
     "http://localhost:5173",
     "http://localhost:5174",
+    "http://localhost:5175",
 ];
 app.use(
     cors({
@@ -46,7 +50,7 @@ app.use(express.json()); // To accept JSON data
 // Apply a general limiter to all /api/ requests
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per window
+    max: 10000, // Limit each IP to 100 requests per window
     message:
         "Too many requests from this IP, please try again after 15 minutes",
     standardHeaders: true, // Return rate limit info in the 'RateLimit-*' headers
@@ -54,16 +58,19 @@ const apiLimiter = rateLimit({
 });
 app.use("/api", apiLimiter);
 
-// Apply a *stricter* limit to the login route
+// 6. SET UP RATE LIMITING for login endpoint specifically
+// TEMPORARILY DISABLED for testing
+/*
 const loginLimiter = rateLimit({
     windowMs: 30 * 60 * 1000, // 30 minutes
-    max: 10, // Limit to 10 login attempts per 30 mins
+    max: 1000, // Limit to 10 login attempts per 30 mins
     message: "Too many login attempts, please try again later.",
     standardHeaders: true,
     legacyHeaders: false,
 });
 // This targets the login route specifically
 app.use("/api/users/login", loginLimiter);
+*/
 
 // 7. Define the port our server will run on
 const PORT = process.env.PORT || 4000;
@@ -87,6 +94,9 @@ app.use("/api/bills", billRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/expenses", expenseRoutes);
+app.use("/api/tenants", tenantRoutes); // NEW
+app.use("/api/financial", financialRoutes); // NEW
+app.use("/api/rent-records", rentRecordRoutes); // NEW
 
 //10. --- Use the Error Middleware (MUST be after routes) ---
 app.use(notFound); // 404 handler

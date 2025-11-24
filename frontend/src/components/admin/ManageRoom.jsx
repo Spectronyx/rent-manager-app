@@ -1,8 +1,8 @@
 // File: frontend/src/components/admin/ManageRoom.jsx
 
 import React, { useState } from 'react';
-import { getAllStudents } from '../../api/userApi';
-import { assignTenantToRoom, vacateRoom } from '../../api/roomApi';
+import { getAllTenants, updateTenant } from '../../api/tenantApi';
+import { vacateRoom } from '../../api/roomApi';
 
 // Receives the 'room' object and the 'onRefresh' function from the parent
 const ManageRoom = ({ room, onRefresh }) => {
@@ -16,10 +16,10 @@ const ManageRoom = ({ room, onRefresh }) => {
         setIsAssigning(true);
         setError('');
         try {
-            const studentData = await getAllStudents();
-            setStudents(studentData);
-            if (studentData.length > 0) {
-                setSelectedStudent(studentData[0]._id); // Default to the first student
+            const tenantData = await getAllTenants();
+            setStudents(tenantData);
+            if (tenantData.length > 0) {
+                setSelectedStudent(tenantData[0]._id); // Default to the first tenant
             }
         } catch (err) {
             setError(err.message);
@@ -34,9 +34,12 @@ const ManageRoom = ({ room, onRefresh }) => {
         }
         setError('');
         try {
-            await assignTenantToRoom(room._id, selectedStudent);
-            setIsAssigning(false); // Close the assign UI
-            onRefresh(); // Tell the parent page to refresh its room list
+            await updateTenant(selectedStudent, {
+                roomId: room._id,
+                buildingId: room.buildingId,
+            });
+            setIsAssigning(false);
+            onRefresh();
         } catch (err) {
             setError(err.message);
         }
@@ -47,10 +50,11 @@ const ManageRoom = ({ room, onRefresh }) => {
         // Optional: Add a confirmation dialog
         if (window.confirm(`Are you sure you want to vacate ${room.tenantId.name}?`)) {
             try {
+                // Clear tenant's room assignment
+                await updateTenant(room.tenantId._id, { roomId: null, buildingId: null });
                 await vacateRoom(room._id);
-                onRefresh(); // Tell the parent to refresh!
+                onRefresh();
             } catch (err) {
-                // We're not handling errors here, but you could
                 console.error(err);
             }
         }
@@ -61,7 +65,6 @@ const ManageRoom = ({ room, onRefresh }) => {
         return (
             <>
                 <p>Tenant: {room.tenantId.name}</p>
-                {/* Replace the disabled button with this: */}
                 <button onClick={handleVacate} style={{ backgroundColor: '#f44336', color: 'white' }}>
                     Vacate Tenant
                 </button>

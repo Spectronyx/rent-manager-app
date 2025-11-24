@@ -27,7 +27,7 @@ const roomSchema = mongoose.Schema({
     // --- Relationship 2: Belongs to a Tenant (User) ---
     tenantId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // References the 'User' model
+        ref: 'Tenant', // References the 'Tenant' model
         default: null, // A room can be vacant, so it can have no tenant
     },
 }, {

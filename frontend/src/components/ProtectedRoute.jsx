@@ -8,7 +8,15 @@ import useAuth from '../hooks/useAuth';
 // It receives the page (as 'children') from App.jsx
 const ProtectedRoute = ({ children }) => {
     // 1. Check if the user is logged in
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-background">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400"></div>
+            </div>
+        );
+    }
 
     if (!user) {
         // 2. If no user, redirect them to the /login page

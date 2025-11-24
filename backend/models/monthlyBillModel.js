@@ -14,6 +14,11 @@ const monthlyBillSchema = mongoose.Schema({
         required: true,
         ref: 'User',
     },
+    buildingId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'Building',
+    },
 
     // --- Bill Period ---
     month: {

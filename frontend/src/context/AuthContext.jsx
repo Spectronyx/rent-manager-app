@@ -10,6 +10,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     // This runs when the app first loads
     useEffect(() => {
@@ -23,6 +24,7 @@ export const AuthProvider = ({ children }) => {
             // We set the default authorization header for all future axios requests
             axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
         }
+        setLoading(false);
     }, []);
 
     const login = async (email, password) => {
@@ -97,7 +99,7 @@ export const AuthProvider = ({ children }) => {
 
     // We provide the user state and login/logout functions to the app
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, register }}>
+        <AuthContext.Provider value={{ user, token, login, logout, register, loading }}>
             {children}
         </AuthContext.Provider>
     );

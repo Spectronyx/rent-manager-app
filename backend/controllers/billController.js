@@ -80,6 +80,7 @@ const generateBills = asyncHandler(async (req, res) => {
         await MonthlyBill.create({
             roomId: room._id,
             tenantId: room.tenantId,
+            buildingId: buildingId,
             month: month,
             year: year,
             rent: room.monthlyRent,
@@ -139,11 +140,11 @@ const getMyCurrentBill = asyncHandler(async (req, res) => {
 
     // Find the *latest* pending bill for this tenant
     const bill = await MonthlyBill.findOne({
-            tenantId: req.user._id,
-            status: {
-                $in: ['Pending', 'PaymentPendingConfirmation', 'Overdue']
-            },
-        })
+        tenantId: req.user._id,
+        status: {
+            $in: ['Pending', 'PaymentPendingConfirmation', 'Overdue']
+        },
+    })
         .sort({
             year: -1,
             month: -1
@@ -207,11 +208,11 @@ const getPendingBills = asyncHandler(async (req, res) => {
 
     // 3. Find all bills for those rooms that are pending
     const pendingBills = await MonthlyBill.find({
-            roomId: {
-                $in: roomIds
-            },
-            status: 'PaymentPendingConfirmation',
-        })
+        roomId: {
+            $in: roomIds
+        },
+        status: 'PaymentPendingConfirmation',
+    })
         .populate('tenantId', 'name')
         .populate('roomId', 'roomNumber');
 

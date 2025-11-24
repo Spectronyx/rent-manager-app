@@ -1,149 +1,228 @@
-// File: frontend/src/components/Navbar.jsx
-
-import React, { useState } from 'react'; // 1. Import useState
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import useAuth from '../hooks/useAuth';
 import { Button } from '@/components/ui/button';
+import { DollarSign, Calendar } from 'lucide-react';
 
-// 2. Import our new components
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
     Sheet,
     SheetContent,
     SheetDescription,
     SheetHeader,
     SheetTitle,
-    SheetTrigger,
+    SheetTrigger
 } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
-import { Menu } from 'lucide-react'; // Our hamburger icon
+import {
+    Menu,
+    Home,
+    History,
+    LogOut,
+    User,
+    Sparkles
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
-
-    // 3. Add state to control the mobile menu
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const handleLogout = () => {
         logout();
         navigate('/login');
-        setIsMobileMenuOpen(false); // Close menu on logout
+        setIsMobileMenuOpen(false);
     };
 
+    const navLinks = user ? [
+        { to: '/dashboard', label: 'Dashboard', icon: Home },
+        { to: '/financials', label: 'Financials', icon: DollarSign },
+        { to: '/payments', label: 'Payments', icon: Calendar },
+        { to: '/history', label: 'History', icon: History },
+    ] : [
+        { to: '/login', label: 'Login', icon: User },
+    ];
+
     return (
-        <nav className="flex items-center justify-between p-4 border-b bg-background">
-            <Link
-                to={user ? '/dashboard' : '/'}
-                className="text-xl font-bold"
-                onClick={() => setIsMobileMenuOpen(false)} // Close menu on logo click
-            >
-                <h1>Rent Manager</h1>
-            </Link>
-
-            {/* 4. --- DESKTOP NAV --- */}
-            {/* 'hidden' by default, 'md:flex' (flex) on medium screens and up */}
-            <div className="hidden md:flex items-center gap-6">
-                {user ? (
-                    // Logged-in desktop links
-                    <>
-                        <Link
-                            to="/dashboard"
-                            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+        <motion.nav
+            className="sticky top-0 z-50 glass-card border-b border-cyan-500/20"
+            initial={{ y: -100 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+        >
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between h-16">
+                    {/* Logo */}
+                    <Link
+                        to={user ? '/dashboard' : '/'}
+                        className="flex items-center gap-2 group"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                        <motion.div
+                            className="relative"
+                            whileHover={{ scale: 1.1, rotate: 180 }}
+                            transition={{ duration: 0.3 }}
                         >
-                            Dashboard
-                        </Link>
-                        <Link
-                            to="/history"
-                            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-                        >
-                            History
-                        </Link>
-                        <span className="text-sm">Hello, {user.name}</span>
-                        <Button variant="ghost" size="sm" onClick={handleLogout}>
-                            Logout
-                        </Button>
-                    </>
-                ) : (
-                    // Logged-out desktop links
-                    <>
-                        <Link to="/login" className="text-sm font-medium text-primary">
-                            Login
-                        </Link>
-                        <Link to="/register" className="text-sm font-medium text-primary">
-                            Register
-                        </Link>
-                    </>
-                )}
-            </div>
+                            <Sparkles className="h-6 w-6 text-cyan-400" />
+                            <motion.div
+                                className="absolute inset-0 rounded-full bg-cyan-400/20 blur-md"
+                                animate={{
+                                    scale: [1, 1.2, 1],
+                                    opacity: [0.5, 0.8, 0.5],
+                                }}
+                                transition={{
+                                    duration: 2,
+                                    repeat: Infinity,
+                                    ease: 'easeInOut',
+                                }}
+                            />
+                        </motion.div>
+                        <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+                            Rent Manager
+                        </span>
+                    </Link>
 
-            {/* 5. --- MOBILE NAV (Hamburger Menu) --- */}
-            {/* 'md:hidden' (hidden on medium screens and up) so it only shows on mobile */}
-            <div className="md:hidden">
-                <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-                    <SheetTrigger asChild>
-                        <Button variant="outline" size="icon">
-                            <Menu className="h-4 w-4" />
-                        </Button>
-                    </SheetTrigger>
-                    <SheetContent>
-                        <SheetHeader>
-                            <SheetTitle>Rent Manager</SheetTitle>
-                            <SheetDescription>
-                                {user ? `Welcome, ${user.name}` : 'Please log in'}
-                            </SheetDescription>
-                        </SheetHeader>
-                        <Separator className="my-4" />
-                        {/* 6. Navigation links *inside* the drawer */}
-                        <nav className="flex flex-col gap-4">
-                            {user ? (
-                                // Logged-in mobile links
-                                <>
+                    {/* Desktop Navigation */}
+                    <div className="hidden md:flex items-center gap-6">
+                        {navLinks.map((link, idx) => {
+                            const Icon = link.icon;
+                            return (
+                                <motion.div
+                                    key={link.to}
+                                    initial={{ opacity: 0, y: -20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: idx * 0.1 }}
+                                >
                                     <Link
-                                        to="/dashboard"
-                                        className="text-lg font-medium"
-                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        to={link.to}
+                                        className="group relative px-4 py-2 text-sm font-medium text-foreground/80 transition-all hover:text-cyan-400"
                                     >
-                                        Dashboard
+                                        <span className="flex items-center gap-2">
+                                            <Icon className="h-4 w-4" />
+                                            {link.label}
+                                        </span>
+                                        <motion.div
+                                            className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-cyan-400 to-purple-500"
+                                            initial={{ width: 0 }}
+                                            whileHover={{ width: '100%' }}
+                                            transition={{ duration: 0.3 }}
+                                        />
                                     </Link>
-                                    <Link
-                                        to="/history"
-                                        className="text-lg font-medium"
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        History
-                                    </Link>
+                                </motion.div>
+                            );
+                        })}
+
+                        {user && (
+                            <>
+                                <Separator orientation="vertical" className="h-6 bg-cyan-500/20" />
+                                <motion.div
+                                    className="flex items-center gap-3"
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.3 }}
+                                >
+                                    <Avatar className="h-8 w-8 ring-2 ring-cyan-400/50 ring-offset-2 ring-offset-background">
+                                        <AvatarFallback className="bg-gradient-to-br from-cyan-400 to-purple-500 text-white text-xs">
+                                            {user.name?.charAt(0).toUpperCase()}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <span className="text-sm text-muted-foreground">
+                                        {user.name}
+                                    </span>
                                     <Button
-                                        variant="destructive"
-                                        className="w-full"
+                                        variant="ghost"
+                                        size="sm"
                                         onClick={handleLogout}
+                                        className="relative group overflow-hidden"
                                     >
+                                        <LogOut className="h-4 w-4 mr-2" />
                                         Logout
+                                        <motion.div
+                                            className="absolute inset-0 bg-gradient-to-r from-pink-500/20 to-purple-500/20"
+                                            initial={{ x: '-100%' }}
+                                            whileHover={{ x: 0 }}
+                                            transition={{ duration: 0.3 }}
+                                        />
                                     </Button>
-                                </>
-                            ) : (
-                                // Logged-out mobile links
-                                <>
-                                    <Link
-                                        to="/login"
-                                        className="text-lg font-medium"
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        Login
-                                    </Link>
-                                    <Link
-                                        to="/register"
-                                        className="text-lg font-medium"
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        Register
-                                    </Link>
-                                </>
-                            )}
-                        </nav>
-                    </SheetContent>
-                </Sheet>
+                                </motion.div>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Mobile Navigation */}
+                    <div className="md:hidden">
+                        <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                            <SheetTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="relative group"
+                                >
+                                    <Menu className="h-5 w-5" />
+                                    <motion.div
+                                        className="absolute inset-0 rounded-md bg-cyan-400/10"
+                                        initial={{ scale: 0 }}
+                                        whileTap={{ scale: 1.2 }}
+                                        transition={{ duration: 0.2 }}
+                                    />
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent className="glass-card border-l border-cyan-500/20">
+                                <SheetHeader>
+                                    <SheetTitle className="text-2xl bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+                                        Rent Manager
+                                    </SheetTitle>
+                                    <SheetDescription>
+                                        {user ? `Welcome, ${user.name}` : 'Please log in'}
+                                    </SheetDescription>
+                                </SheetHeader>
+                                <Separator className="my-4 bg-cyan-500/20" />
+                                <nav className="flex flex-col gap-4">
+                                    {navLinks.map((link, idx) => {
+                                        const Icon = link.icon;
+                                        return (
+                                            <motion.div
+                                                key={link.to}
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ delay: idx * 0.1 }}
+                                            >
+                                                <Link
+                                                    to={link.to}
+                                                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-lg font-medium transition-all hover:bg-cyan-400/10 hover:text-cyan-400"
+                                                    onClick={() => setIsMobileMenuOpen(false)}
+                                                >
+                                                    <Icon className="h-5 w-5" />
+                                                    {link.label}
+                                                </Link>
+                                            </motion.div>
+                                        );
+                                    })}
+                                    {user && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 0.3 }}
+                                        >
+                                            <Button
+                                                variant="destructive"
+                                                className="w-full"
+                                                onClick={handleLogout}
+                                            >
+                                                <LogOut className="h-4 w-4 mr-2" />
+                                                Logout
+                                            </Button>
+                                        </motion.div>
+                                    )}
+                                </nav>
+                            </SheetContent>
+                        </Sheet>
+                    </div>
+                </div>
             </div>
-        </nav>
+        </motion.nav>
     );
 };
 
