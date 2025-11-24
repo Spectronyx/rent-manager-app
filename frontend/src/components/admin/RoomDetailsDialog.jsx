@@ -18,16 +18,19 @@ import {
     Phone,
     CreditCard,
     GraduationCap,
+    FileText, // This was missing in the original code but used later, adding it for completeness
     Calendar
 } from 'lucide-react';
 import { AssignTenantDialog } from './AssignTenantDialog';
 import { EditTenantDialog } from './EditTenantDialog';
 import { TenantFinancialHistory } from './TenantFinancialHistory';
+import { TenantDocumentsDialog } from './TenantDocumentsDialog';
 
 export const RoomDetailsDialog = ({ open, onClose, room, buildingId, onUpdate }) => {
     const [showAssignDialog, setShowAssignDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [showFinancialHistory, setShowFinancialHistory] = useState(false);
+    const [showDocumentsDialog, setShowDocumentsDialog] = useState(false);
     const [selectedTenant, setSelectedTenant] = useState(null);
 
     if (!room) return null;
@@ -39,7 +42,7 @@ export const RoomDetailsDialog = ({ open, onClose, room, buildingId, onUpdate })
     return (
         <>
             <Dialog open={open} onOpenChange={onClose}>
-                <DialogContent className="glass-card border-cyan-500/30 max-w-3xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="glass-card border-cyan-500/30 max-w-5xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
                             Room {room.roomNumber} - Details
@@ -77,19 +80,19 @@ export const RoomDetailsDialog = ({ open, onClose, room, buildingId, onUpdate })
                                 </div>
                             ) : (
                                 <>
-                                    <div className="space-y-3">
+                                    <div className="flex gap-4 overflow-x-auto pb-4 snap-x">
                                         {tenants.map((tenant) => (
                                             <div
                                                 key={tenant._id}
-                                                className="glass-card rounded-xl p-5 border-2 border-white/10 hover:border-cyan-400/30 transition-all"
+                                                className="glass-card rounded-xl p-5 border-2 border-white/10 hover:border-cyan-400/30 transition-all min-w-[350px] snap-center"
                                             >
                                                 <div className="flex items-start justify-between mb-4">
                                                     <div className="flex items-center gap-4">
-                                                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center text-white font-bold text-2xl">
+                                                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center text-white font-bold text-2xl shrink-0">
                                                             {tenant.name.charAt(0).toUpperCase()}
                                                         </div>
                                                         <div>
-                                                            <h3 className="text-xl font-bold text-foreground mb-1">
+                                                            <h3 className="text-xl font-bold text-foreground mb-1 truncate max-w-[150px]" title={tenant.name}>
                                                                 {tenant.name}
                                                             </h3>
                                                             <div className="flex items-center gap-2">
@@ -100,47 +103,58 @@ export const RoomDetailsDialog = ({ open, onClose, room, buildingId, onUpdate })
                                                             </div>
                                                         </div>
                                                     </div>
-
-                                                    <div className="flex items-center gap-2">
-                                                        <Button
-                                                            size="sm"
-                                                            variant="outline"
-                                                            onClick={() => {
-                                                                setSelectedTenant(tenant);
-                                                                setShowEditDialog(true);
-                                                            }}
-                                                            className="glass border-white/10 hover:bg-cyan-500/20"
-                                                        >
-                                                            <Edit className="h-4 w-4 mr-2" />
-                                                            Edit
-                                                        </Button>
-                                                        <Button
-                                                            size="sm"
-                                                            onClick={() => {
-                                                                setSelectedTenant(tenant);
-                                                                setShowFinancialHistory(true);
-                                                            }}
-                                                            className="bg-gradient-to-r from-green-500 to-emerald-600"
-                                                        >
-                                                            <DollarSign className="h-4 w-4 mr-2" />
-                                                            Financial History
-                                                        </Button>
-                                                    </div>
                                                 </div>
 
-                                                <div className="grid grid-cols-2 gap-4">
+                                                <div className="grid grid-cols-1 gap-3 mb-4">
                                                     <div className="flex items-center gap-2 text-sm">
-                                                        <Mail className="h-4 w-4 text-cyan-400" />
-                                                        <span className="text-muted-foreground">{tenant.email}</span>
+                                                        <Mail className="h-4 w-4 text-cyan-400 shrink-0" />
+                                                        <span className="text-muted-foreground truncate" title={tenant.email}>{tenant.email}</span>
                                                     </div>
                                                     <div className="flex items-center gap-2 text-sm">
-                                                        <Phone className="h-4 w-4 text-green-400" />
+                                                        <Phone className="h-4 w-4 text-green-400 shrink-0" />
                                                         <span className="text-muted-foreground">{tenant.phone}</span>
                                                     </div>
                                                     <div className="flex items-center gap-2 text-sm">
-                                                        <CreditCard className="h-4 w-4 text-purple-400" />
+                                                        <CreditCard className="h-4 w-4 text-purple-400 shrink-0" />
                                                         <span className="text-muted-foreground">{tenant.aadharNo}</span>
                                                     </div>
+                                                </div>
+
+                                                <div className="flex flex-wrap gap-2 mt-auto">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => {
+                                                            setSelectedTenant(tenant);
+                                                            setShowEditDialog(true);
+                                                        }}
+                                                        className="glass border-white/10 hover:bg-cyan-500/20 flex-1"
+                                                    >
+                                                        <Edit className="h-4 w-4 mr-2" />
+                                                        Edit
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            setSelectedTenant(tenant);
+                                                            setShowDocumentsDialog(true);
+                                                        }}
+                                                        className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white flex-1"
+                                                    >
+                                                        <FileText className="h-4 w-4 mr-2" />
+                                                        Docs
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            setSelectedTenant(tenant);
+                                                            setShowFinancialHistory(true);
+                                                        }}
+                                                        className="bg-gradient-to-r from-green-500 to-emerald-600 flex-1"
+                                                    >
+                                                        <DollarSign className="h-4 w-4 mr-2" />
+                                                        History
+                                                    </Button>
                                                 </div>
                                             </div>
                                         ))}
@@ -227,6 +241,18 @@ export const RoomDetailsDialog = ({ open, onClose, room, buildingId, onUpdate })
                     open={showFinancialHistory}
                     onClose={() => {
                         setShowFinancialHistory(false);
+                        setSelectedTenant(null);
+                    }}
+                    tenant={selectedTenant}
+                />
+            )}
+
+            {/* Documents Dialog */}
+            {selectedTenant && (
+                <TenantDocumentsDialog
+                    open={showDocumentsDialog}
+                    onClose={() => {
+                        setShowDocumentsDialog(false);
                         setSelectedTenant(null);
                     }}
                     tenant={selectedTenant}

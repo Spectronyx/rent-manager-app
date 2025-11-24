@@ -1,52 +1,69 @@
-// File: frontend/src/api/documentApi.js
-
 import axios from 'axios';
 
-const API_URL = `${import.meta.env.VITE_API_URL}/api/documents`; // Using 5001 as we planned
+const API_URL = import.meta.env.VITE_API_URL + '/api/tenants';
 
-export const uploadDocument = async (userId, documentType, file) => {
-    const formData = new FormData();
-    formData.append('userId', userId);
-    formData.append('documentType', documentType);
-    formData.append('document', file);
-
-    try {
-        const res = await axios.post(API_URL, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-        return res.data;
-    } catch (error) {
-        // --- THIS IS THE FIX ---
-        // Check if error.response and error.response.data exist before reading them.
-        const message =
-            (error.response &&
-                error.response.data &&
-                error.response.data.message) ||
-            error.message || // Fallback to the general error message
-            'File upload failed';
-        throw new Error(message);
-        // --- END OF FIX ---
-    }
+// Get token from local storage
+const getToken = () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    return user?.token;
 };
 
-// GET /api/documents/my (for students)
-export const getMyDocuments = async () => {
-    try {
-        const res = await axios.get(`${API_URL}/my`);
-        return res.data;
-    } catch (error) {
-        throw new Error(error.response.data.message || 'Could not fetch documents');
-    }
+// Config with token
+const getConfig = () => {
+    const token = getToken();
+    return {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    };
 };
 
-// GET /api/documents/:userId (for admins)
-export const getDocumentsForUser = async (userId) => {
-    try {
-        const res = await axios.get(`${API_URL}/${userId}`);
-        return res.data;
-    } catch (error) {
-        throw new Error(error.response.data.message || 'Could not fetch documents');
-    }
+// Config for file upload
+const getUploadConfig = (onProgress) => {
+    const token = getToken();
+    return {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+        },
+        onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            if (onProgress) {
+                onProgress(percentCompleted);
+            }
+        },
+    };
 };
+
+// Upload document
+export const uploadDocument = async (tenantId, formData, onProgress) => {
+    const response = await axios.post(
+        `${API_URL}/${tenantId}/documents`,
+        formData,
+        getUploadConfig(onProgress)
+    );
+    return response.data;
+};
+
+// Get documents
+export const getDocuments = async (tenantId) => {
+    const response = await axios.get(`${API_URL}/${tenantId}/documents`, getConfig());
+    return response.data;
+};
+
+// Delete document
+export const deleteDocument = async (tenantId, documentId) => {
+    const response = await axios.delete(
+        `${API_URL}/${tenantId}/documents/${documentId}`,
+        getConfig()
+    );
+    return response.data;
+};
+
+const documentApi = {
+    uploadDocument,
+    getDocuments,
+    deleteDocument,
+};
+
+export default documentApi;
