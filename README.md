@@ -1,5 +1,8 @@
 # 🏠 Rent Manager App
 
+# update added for github presentation and automation
+
+#updated v2 : lINK FOR THE APP : rent-manager-app.vercel.com
 A comprehensive full-stack property management system for landlords and tenants to manage buildings, rooms, rent collection, bills, and financial tracking.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
@@ -9,46 +12,50 @@ A comprehensive full-stack property management system for landlords and tenants 
 ## ✨ Features
 
 ### For Administrators
-- 🏢 **Building Management**: Add and manage multiple properties
-- 🚪 **Room Management**: Track room occupancy, rent, and tenant assignments
-- 👥 **Tenant Management**: Manage tenant information and assignments
-- 💰 **Bill Generation**: Automatically generate monthly bills with electricity and other charges
-- 💳 **Payment Tracking**: Confirm payments and track collection rates
-- 📊 **Financial Dashboard**: Real-time insights into collections, expenses, and profitability
-- 📈 **Reports**: Monthly financial reports with detailed breakdowns
-- 💸 **Expense Tracking**: Record and categorize building expenses
-- 📋 **Payment History**: Complete audit trail of all transactions
+
+-   🏢 **Building Management**: Add and manage multiple properties
+-   🚪 **Room Management**: Track room occupancy, rent, and tenant assignments
+-   👥 **Tenant Management**: Manage tenant information and assignments
+-   💰 **Bill Generation**: Automatically generate monthly bills with electricity and other charges
+-   💳 **Payment Tracking**: Confirm payments and track collection rates
+-   📊 **Financial Dashboard**: Real-time insights into collections, expenses, and profitability
+-   📈 **Reports**: Monthly financial reports with detailed breakdowns
+-   💸 **Expense Tracking**: Record and categorize building expenses
+-   📋 **Payment History**: Complete audit trail of all transactions
 
 ### For Tenants
-- 📄 **View Bills**: Access current and past bills
-- ✅ **Payment Confirmation**: Mark bills as paid for admin verification
-- 📜 **Payment History**: Track all payment records
+
+-   📄 **View Bills**: Access current and past bills
+-   ✅ **Payment Confirmation**: Mark bills as paid for admin verification
+-   📜 **Payment History**: Track all payment records
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **React** 18+ with Vite
-- **React Router** for navigation
-- **Axios** for API calls
-- **Framer Motion** for animations
-- **Shadcn/ui** for UI components
-- **Lucide React** for icons
-- **React Hook Form** for form handling
-- **jsPDF** for PDF generation
+
+-   **React** 18+ with Vite
+-   **React Router** for navigation
+-   **Axios** for API calls
+-   **Framer Motion** for animations
+-   **Shadcn/ui** for UI components
+-   **Lucide React** for icons
+-   **React Hook Form** for form handling
+-   **jsPDF** for PDF generation
 
 ### Backend
-- **Node.js** with Express
-- **MongoDB** with Mongoose
-- **JWT** for authentication
-- **bcryptjs** for password hashing
-- **express-rate-limit** for API protection
-- **dotenv** for environment variables
+
+-   **Node.js** with Express
+-   **MongoDB** with Mongoose
+-   **JWT** for authentication
+-   **bcryptjs** for password hashing
+-   **express-rate-limit** for API protection
+-   **dotenv** for environment variables
 
 ## 📋 Prerequisites
 
-- Node.js >= 18.0.0
-- MongoDB (local or Atlas)
-- npm or yarn
+-   Node.js >= 18.0.0
+-   MongoDB (local or Atlas)
+-   npm or yarn
 
 ## 🚀 Installation
 
@@ -112,24 +119,25 @@ The frontend will run on `http://localhost:5173`
 
 ### Backend (.env)
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `MONGO_URI` | MongoDB connection string | `mongodb://localhost:27017/rent-manager` or Atlas URI |
-| `JWT_SECRET` | Secret key for JWT tokens | Any random secure string |
-| `PORT` | Backend server port | `4000` |
-| `NODE_ENV` | Environment mode | `development` or `production` |
+| Variable     | Description               | Example                                               |
+| ------------ | ------------------------- | ----------------------------------------------------- |
+| `MONGO_URI`  | MongoDB connection string | `mongodb://localhost:27017/rent-manager` or Atlas URI |
+| `JWT_SECRET` | Secret key for JWT tokens | Any random secure string                              |
+| `PORT`       | Backend server port       | `4000`                                                |
+| `NODE_ENV`   | Environment mode          | `development` or `production`                         |
 
 ### Frontend (.env)
 
-| Variable | Description | Example |
-|----------|-------------|---------|
+| Variable       | Description          | Example                 |
+| -------------- | -------------------- | ----------------------- |
 | `VITE_API_URL` | Backend API base URL | `http://localhost:4000` |
 
 ## 👤 Default Admin Account
 
 After initial setup, create an admin account through the registration page:
-- Use the registration endpoint to create your first admin user
-- Role will be set to 'admin' automatically
+
+-   Use the registration endpoint to create your first admin user
+-   Role will be set to 'admin' automatically
 
 ## 📖 Usage Guide
 
@@ -153,20 +161,23 @@ After initial setup, create an admin account through the registration page:
 ## 🎨 Key Features Explained
 
 ### Financial Dashboard
-- **Total Collections**: Sum of all confirmed payments
-- **Collection Rate**: Percentage of expected rent collected
-- **Occupancy Rate**: Percentage of rooms occupied
-- **Net Profit**: Collections minus expenses
-- **Total Dues**: Unpaid rent amounts
-- **Period Filters**: View stats for specific months or all-time
+
+-   **Total Collections**: Sum of all confirmed payments
+-   **Collection Rate**: Percentage of expected rent collected
+-   **Occupancy Rate**: Percentage of rooms occupied
+-   **Net Profit**: Collections minus expenses
+-   **Total Dues**: Unpaid rent amounts
+-   **Period Filters**: View stats for specific months or all-time
 
 ### Bill Generation
-- Automatically includes base rent
-- Add electricity bills and other charges
-- Carries forward previous dues
-- Creates bills for all occupied rooms at once
+
+-   Automatically includes base rent
+-   Add electricity bills and other charges
+-   Carries forward previous dues
+-   Creates bills for all occupied rooms at once
 
 ### Payment Flow
+
 1. Admin generates monthly bills
 2. Tenant marks bill as "Paid"
 3. Admin confirms payment
@@ -175,9 +186,10 @@ After initial setup, create an admin account through the registration page:
 ## 🌐 Deployment
 
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions for:
-- MongoDB Atlas
-- Backend deployment (Render, Railway, Heroku)
-- Frontend deployment (Vercel, Netlify)
+
+-   MongoDB Atlas
+-   Backend deployment (Render, Railway, Heroku)
+-   Frontend deployment (Vercel, Netlify)
 
 ## 📁 Project Structure
 
@@ -203,12 +215,12 @@ rent-manager-app/
 
 ## 🔒 Security
 
-- JWT-based authentication
-- Password hashing with bcryptjs
-- Role-based access control (Admin/Tenant)
-- API rate limiting
-- CORS protection
-- Input validation
+-   JWT-based authentication
+-   Password hashing with bcryptjs
+-   Role-based access control (Admin/Tenant)
+-   API rate limiting
+-   CORS protection
+-   Input validation
 
 ## 🤝 Contributing
 

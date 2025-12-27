@@ -11,7 +11,7 @@ const buildingRoutes = require("./routes/buildingRoutes.js");
 const roomRoutes = require("./routes/roomRoutes.js");
 const billRoutes = require("./routes/billRoutes.js");
 const paymentRoutes = require("./routes/paymentRoutes.js");
-const documentRoutes = require("./routes/documentRoutes.js");
+// const documentRoutes = require("./routes/documentRoutes.js");
 const expenseRoutes = require("./routes/expenseRoute.js"); // <-- 2. Fixed typo (plural)
 const tenantRoutes = require("./routes/tenantRoutes.js"); // NEW
 const financialRoutes = require("./routes/financialRoutes.js"); // NEW
@@ -92,7 +92,7 @@ app.use("/api/buildings", buildingRoutes);
 app.use("/api/rooms", roomRoutes);
 app.use("/api/bills", billRoutes);
 app.use("/api/payments", paymentRoutes);
-app.use("/api/documents", documentRoutes);
+// app.use("/api/documents", documentRoutes); // Removed as routes are in tenantRoutes
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/tenants", tenantRoutes); // NEW
 app.use("/api/financial", financialRoutes); // NEW

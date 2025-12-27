@@ -1,41 +1,39 @@
-// File: backend/middleware/uploadMiddleware.js
-
 const multer = require('multer');
 const path = require('path');
 
-// Set up storage engine
+// Set storage engine
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/'); // Save files to the 'uploads' folder
+        cb(null, 'uploads/'); // Make sure this directory exists or use /tmp
     },
     filename: function (req, file, cb) {
-        // Create a unique filename
-        cb(
-            null,
-            `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`
-        );
-    },
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
 });
 
-// File filter (to allow only certain file types)
+// Check file type
 function checkFileType(file, cb) {
+    // Allowed ext
     const filetypes = /jpeg|jpg|png|pdf/;
+    // Check ext
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    // Check mime
     const mimetype = filetypes.test(file.mimetype);
 
     if (mimetype && extname) {
         return cb(null, true);
     } else {
-        cb('Error: Only images (jpeg, jpg, png) and PDFs are allowed!');
+        cb('Error: Images and PDFs Only!');
     }
 }
 
-// Initialize upload variable
+// Init upload
 const upload = multer({
     storage: storage,
+    limits: { fileSize: 5000000 }, // 5MB limit
     fileFilter: function (req, file, cb) {
         checkFileType(file, cb);
-    },
+    }
 });
 
 module.exports = upload;

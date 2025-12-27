@@ -1,84 +1,148 @@
-// File: backend/controllers/documentController.js
-
-const fs = require('fs'); // Node.js File System module
 const asyncHandler = require('express-async-handler');
-const Document = require('../models/documentModel.js');
-const cloudinary = require('../config/cloudinary.js'); // Our Cloudinary config
-const path = require('path'); // <-- 1. IMPORT 'path'
+const Tenant = require('../models/tenantModel');
+const cloudinary = require('../config/cloudinaryConfig');
+const fs = require('fs');
 
-
-// @desc    Upload a document
-// @route   POST /api/documents
+// @desc    Upload a document for a tenant
+// @route   POST /api/tenants/:id/documents
 // @access  Private/Admin
 const uploadDocument = asyncHandler(async (req, res) => {
-    // 1. Check if a file was caught by multer
+    const tenant = await Tenant.findById(req.params.id);
+
+    if (!tenant) {
+        res.status(404);
+        throw new Error('Tenant not found');
+    }
+
     if (!req.file) {
         res.status(400);
         throw new Error('Please upload a file');
     }
 
-    // 2. Get data from the form body
-    const {
-        userId,
-        documentType
-    } = req.body;
-    if (!userId || !documentType) {
-        res.status(400);
-        throw new Error('User ID and Document Type are required');
+    try {
+        // Upload to Cloudinary
+        const result = await cloudinary.uploader.upload(req.file.path, {
+            folder: 'rent-manager/documents',
+            resource_type: 'auto',
+            type: 'authenticated', // Private/Authenticated access
+            access_mode: 'authenticated'
+        });
+
+        // Remove file from local uploads folder
+        fs.unlinkSync(req.file.path);
+
+        const newDocument = {
+            name: req.body.name || req.file.originalname,
+            type: req.body.type || 'Other',
+            url: result.secure_url, // Store base URL, but we will sign it on retrieval
+            publicId: result.public_id,
+            uploadedBy: req.user._id,
+        };
+
+        tenant.documents.push(newDocument);
+        await tenant.save();
+
+        // Return the document with a temporary download URL immediately
+        const downloadUrl = cloudinary.utils.private_download_url(newDocument.publicId, 'pdf', {
+            resource_type: 'image',
+            type: 'authenticated',
+            expires_at: Math.floor(Date.now() / 1000) + 3600
+        });
+
+        const responseDoc = newDocument;
+        responseDoc.url = downloadUrl;
+
+        res.status(201).json(responseDoc);
+    } catch (error) {
+        // Remove file if upload fails
+        if (req.file && fs.existsSync(req.file.path)) {
+            fs.unlinkSync(req.file.path);
+        }
+        res.status(500);
+        throw new Error('File upload failed: ' + error.message);
+    }
+});
+
+// @desc    Get all documents for a tenant
+// @route   GET /api/tenants/:id/documents
+// @access  Private
+const getDocuments = asyncHandler(async (req, res) => {
+    const tenant = await Tenant.findById(req.params.id);
+
+    if (!tenant) {
+        res.status(404);
+        throw new Error('Tenant not found');
     }
 
-    const absolutePath = path.join(__dirname, '../', req.file.path);
+    // Check authorization
+    if (req.user.role !== 'admin' && req.user.email !== tenant.email) {
+        res.status(403);
+        throw new Error('Not authorized to view these documents');
+    }
+
+    // Generate SIGNED URLs for all documents
+    // Generate secure download URLs for all documents
+    const docs = tenant.documents.map(doc => {
+        const docObj = doc.toObject();
+
+        // Determine type based on stored URL
+        const isAuthenticated = doc.url.includes('/authenticated/');
+        const type = isAuthenticated ? 'authenticated' : 'upload';
+
+        // Determine format from URL or default to pdf
+        const format = doc.url.split('.').pop() || 'pdf';
+
+        // Generate private download URL
+        // This works for both authenticated and restricted public assets
+        docObj.url = cloudinary.utils.private_download_url(doc.publicId, format, {
+            resource_type: 'image',
+            type: type,
+            expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 hour validity
+        });
+
+        return docObj;
+    });
+
+    res.json(docs);
+});
+
+// @desc    Delete a document
+// @route   DELETE /api/tenants/:id/documents/:documentId
+// @access  Private/Admin
+const deleteDocument = asyncHandler(async (req, res) => {
+    const tenant = await Tenant.findById(req.params.id);
+
+    if (!tenant) {
+        res.status(404);
+        throw new Error('Tenant not found');
+    }
+
+    const document = tenant.documents.id(req.params.documentId);
+
+    if (!document) {
+        res.status(404);
+        throw new Error('Document not found');
+    }
 
     try {
-        // 3. Upload the file from our local 'uploads' folder to Cloudinary
-        const result = await cloudinary.uploader.upload(req.file.path, {
-            folder: 'rent-manager-documents', // Optional: creates a folder in Cloudinary
-            resource_type: 'auto', // Detects if it's PDF, JPG, etc.
-        });
+        // Delete from Cloudinary
+        await cloudinary.uploader.destroy(document.publicId);
 
-        // 4. Create the new document in our database
-        const document = await Document.create({
-            userId: userId,
-            documentType: documentType,
-            fileUrl: result.secure_url, // The URL from Cloudinary
-            status: 'Approved', // Or 'Pending' if you want
-        });
+        // Remove from array
+        // document.remove(); // Deprecated in Mongoose 6+?
+        // Use pull
+        tenant.documents.pull(document._id);
+        await tenant.save();
 
-        // 5. IMPORTANT: Delete the temporary file from our 'uploads' folder
-        fs.unlinkSync(req.file.path);
-
-        // 6. Send the successful response
-        res.status(201).json(document);
+        res.json({ message: 'Document removed' });
     } catch (error) {
-        // 5b. If upload fails, still delete the temp file
-        fs.unlinkSync(req.file.path);
         res.status(500);
-        throw new Error('File upload failed. ' + error.message);
+        throw new Error('Delete failed: ' + error.message);
     }
-});
-
-// @desc    Get documents for a specific user (for admin)
-// @route   GET /api/documents/:userId
-// @access  Private/Admin
-const getDocumentsForUser = asyncHandler(async (req, res) => {
-    const documents = await Document.find({
-        userId: req.params.userId
-    });
-    res.json(documents);
-});
-
-// @desc    Get logged-in student's own documents
-// @route   GET /api/documents/my
-// @access  Private
-const getMyDocuments = asyncHandler(async (req, res) => {
-    const documents = await Document.find({
-        userId: req.user._id
-    });
-    res.json(documents);
 });
 
 module.exports = {
     uploadDocument,
-    getDocumentsForUser,
-    getMyDocuments,
+    getDocuments,
+    deleteDocument,
 };

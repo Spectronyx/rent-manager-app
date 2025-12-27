@@ -46,6 +46,14 @@ const tenantSchema = mongoose.Schema({
         enum: ['active', 'inactive'],
         default: 'active',
     },
+    documents: [{
+        name: { type: String, required: true },
+        type: { type: String, required: true }, // 'Identity', 'Agreement', 'Photo', 'Other'
+        url: { type: String, required: true },
+        publicId: { type: String, required: true },
+        uploadedAt: { type: Date, default: Date.now },
+        uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    }],
 }, {
     timestamps: true,
 });
